@@ -25,6 +25,7 @@ include:
 - Multiplayer / account system / dedicated server
 - Scripting / modding
 - Vulkan rendering
+- UI / font / 2D rendering
 
 I believe multiplayer has been done before, but
 I've never seen a dedicated server and certainly never
