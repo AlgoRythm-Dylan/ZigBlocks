@@ -8,24 +8,9 @@ pub extern fn DefWindowProcA(
     lParam: win.LPARAM
 ) callconv(win.WINAPI) isize;
 
-pub fn ZigWindowProcA(
-    hwnd: win.HWND,
-    uMsg: win.UINT,
-    wParam: win.WPARAM,
-    lParam: win.LPARAM
-) callconv(win.WINAPI) isize {
-    if(uMsg == WM_CLOSE){
-        PostQuitMessage(0);
-        return 0;
-    }
-    else {
-        return DefWindowProcA(hwnd, uMsg, wParam, lParam);
-    }
-}
-
 pub const WNDCLASSA = extern struct {
     style: win.UINT = 0,
-    lpfnWndProc: *const fn(win.HWND, win.UINT, win.WPARAM, win.LPARAM) callconv(win.WINAPI) win.LRESULT = ZigWindowProcA,
+    lpfnWndProc: *const fn(win.HWND, win.UINT, win.WPARAM, win.LPARAM) callconv(win.WINAPI) win.LRESULT = DefWindowProcA,
     cbClsExtra: c_int = 0,
     cbWndExtra: c_int = 0,
     hInstance: ?win.HINSTANCE = null,

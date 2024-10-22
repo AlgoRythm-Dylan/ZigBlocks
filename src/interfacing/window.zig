@@ -2,24 +2,65 @@ const std = @import("std");
 const win = std.os.windows;
 const wintypes = @import("../platform/windows.zig");
 
-pub fn showTestWindow(hInstance: win.HINSTANCE) void {
-    const win_class: wintypes.WNDCLASSA = . {
-        .hInstance = hInstance,
-        .lpszClassName = "ZigBlocks Window Class"
-    };
-    _ = wintypes.RegisterClassA(&win_class);
-    const instance  = wintypes.CreateWindowExA(
-        0,
-        "ZigBlocks Window Class",
-        "ZigBlocks",
-        wintypes.WS_OVERLAPPEDWINDOW | wintypes.WS_VISIBLE,
-        100,
-        100, 
-        600,
-        400,
-        null,
-        null,
-        hInstance,
-        null);
-    _ = wintypes.ShowWindow(instance, 1);
+pub fn ZigWindowProcA(
+    hwnd: win.HWND,
+    uMsg: win.UINT,
+    wParam: win.WPARAM,
+    lParam: win.LPARAM
+) callconv(win.WINAPI) isize {
+    if(uMsg == wintypes.WM_CLOSE){
+        wintypes.PostQuitMessage(0);
+        return 0;
+    }
+    else {
+        return wintypes.DefWindowProcA(hwnd, uMsg, wParam, lParam);
+    }
 }
+
+pub const OSWindowArgs = struct {
+    hInstance: win.HINSTANCE
+};
+
+pub const OSWindow = struct {
+
+    instance: win.HWND = undefined,
+
+    pub fn init(args: OSWindowArgs) OSWindow {
+        // Create the "window class" - look and feel,
+        // capabilities, etc.
+        const win_class: wintypes.WNDCLASSA = . {
+            .hInstance = args.hInstance,
+            .lpfnWndProc = ZigWindowProcA,
+            .lpszClassName = "ZigBlocks Window Class"
+        };
+        // Register the class so we can request instances of it
+        _ = wintypes.RegisterClassA(&win_class);
+        // Request an instance of it
+        const instance  = wintypes.CreateWindowExA(
+            0,
+            "ZigBlocks Window Class",
+            "ZigBlocks",
+            wintypes.WS_OVERLAPPEDWINDOW | wintypes.WS_VISIBLE,
+            100,
+            100, 
+            600,
+            400,
+            null,
+            null,
+            args.hInstance,
+            null);
+
+        // Return a new OSWindow containing that instance
+        return .{ .instance = instance };
+    }
+    pub fn show(this: *const OSWindow) void {
+        _ = wintypes.ShowWindow(this.instance, 1);
+    }
+    pub fn loop(this: *const OSWindow) void {
+        var message: wintypes.MSG = undefined;
+        while(wintypes.GetMessageA(&message, this.instance, 0, 0) > 0){
+            _ = wintypes.TranslateMessage(&message);
+            _ = wintypes.DispatchMessageA(&message);
+        }
+    }
+};
