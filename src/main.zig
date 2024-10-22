@@ -1,6 +1,7 @@
 const std = @import("std");
 const win = std.os.windows;
 const window = @import("./interfacing/window.zig");
+const wintypes = @import("./platform/windows.zig");
 
 // pub fn main() !void {
 //     window.showTestWindow();
@@ -22,6 +23,11 @@ pub export fn wWinMain(hInstance: win.HINSTANCE,
     _ = nCmdShow;
 
     window.showTestWindow(hInstance);
+    var message: wintypes.MSG = undefined;
+    while(wintypes.GetMessageA(&message, null, 0, 0) > 0){
+        _ = wintypes.TranslateMessage(&message);
+        _ = wintypes.DispatchMessageA(&message);
+    }
 
     return 0;
 }

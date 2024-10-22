@@ -67,3 +67,17 @@ pub extern fn CreateWindowExA(
 ) win.HWND;
 
 pub extern fn ShowWindow(hWnd: win.HWND, nCmdShow: c_int) win.BOOL;
+
+pub const MSG = extern struct {
+    hwnd: win.HWND,
+    message: win.UINT,
+    wParam: win.WPARAM,
+    lParam: win.LPARAM,
+    time: win.DWORD,
+    pt: win.POINT,
+    lPrivate: win.DWORD
+};
+
+pub extern fn GetMessageA(lpMsg: *MSG, hWnd: ?win.HWND, wMsgFilterMin: win.UINT, wMsgFilterMax: win.UINT) win.BOOL;
+pub extern fn TranslateMessage(lpMsg: *const MSG) win.BOOL;
+pub extern fn DispatchMessageA(lpMsg: *const MSG) win.BOOL;

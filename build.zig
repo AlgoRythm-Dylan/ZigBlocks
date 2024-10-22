@@ -13,6 +13,8 @@ pub fn build(b: *std.Build) void {
     });
     b.installArtifact(exe);
     exe.linkLibC();
+    exe.linkSystemLibrary("User32");
+    exe.subsystem = .Windows;
     const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
     
