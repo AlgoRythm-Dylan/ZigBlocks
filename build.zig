@@ -12,11 +12,13 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     b.installArtifact(exe);
+
     exe.linkLibC();
     exe.linkSystemLibrary("user32");
     exe.addLibraryPath(b.path("./dependency/lib"));
     exe.linkSystemLibrary("vulkan-1");
     exe.subsystem = .Windows;
+    
     const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
     
@@ -32,6 +34,11 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
+
+    exe_unit_tests.linkLibC();
+    exe_unit_tests.linkSystemLibrary("user32");
+    exe_unit_tests.addLibraryPath(b.path("./dependency/lib"));
+    exe_unit_tests.linkSystemLibrary("vulkan-1");
 
     const run_exe_unit_tests = b.addRunArtifact(exe_unit_tests);
     

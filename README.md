@@ -48,3 +48,10 @@ OK if I come out the other end without any product to show
 for it. I just want to learn and test my abilities. Maybe
 I will come back five years later and see how much farther
 I can get. Until then, I guess we can only see what happens.
+
+## The Blog
+Read about my progress and see what it's like to be me!
+
+- [entry1](blog/entry1.md): I create a basic win32 window
+- [entry2](blog/entry2.md): Implementing a win32 message loop for the window
+- [entry3](blog/entry3.md): Code re-org of previous two entries

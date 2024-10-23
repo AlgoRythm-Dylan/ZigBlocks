@@ -6,7 +6,7 @@ complexity and throw Zig in the mix!
 
 ## The SDK
 I spent a good amount of time reading about Vulkan
-before I decided to dive into this and they all
+before I decided to dive into this and various tutorials all
 recommend installing the SDK. It's 4GB, but that's
 not uncommon for an SDK - plus it comes with lots
 of tools that might help me in the future.
@@ -68,3 +68,41 @@ exe.linkSystemLibrary("vulkan-1");
 And to my surprise, `zig build` didn't return any
 errors! This is maybe because I'm not actually
 using Vulkan yet, so let's fix that.
+
+## Some binding work
+Since I don't trust `cImport` and `cInclude`, I
+have just straight up skipped trying them and am
+instead doing the bindings myself. The down-side:
+it takes *forever*. The up-side: I get to *really*
+learn the Vulkan API, and as a bonus, I can add
+Zig doc comments to everything.
+
+I've created a folder in called `src/graphics/vulkan`
+and I am going to try and separate each item by
+type: functions, types, etc.
+
+[https://vulkan-tutorial.com/](https://vulkan-tutorial.com/)
+started off by saying to fill out a `VkApplicationInfo`
+but then later (after I already wrote the bindings)
+clarified it was optional. Damn. There goes five
+minutes.
+
+I implemented the macro VK_MAKE_API_VERSION in Zig
+in the `helpers.zig` file and also wrote my first
+unit test. This is where I learned that your
+testing project also needs the same linking setup
+that your exe project does. I added the links
+and ran test, but nothing happened. I am assuming
+this is because `helpers.zig` is not reached by the
+entrypoint yet.
+
+Next up was one I really do need. `VkInstanceCreateInfo`
+is a structure that we pass to create a Vulkan instance,
+and it tells Vulkan critical information about our
+usage, such as the extensions we need.
+
+Vulkan itself doesn't have support for rendering to
+a win32 window. Instead, we need to use an extension.
+This project *hopes* to support X11, but again,
+that's a project for another day (very soon, probably
+after I render my first triangle)
