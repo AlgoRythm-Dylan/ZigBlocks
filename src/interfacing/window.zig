@@ -1,6 +1,9 @@
 const std = @import("std");
 const win = std.os.windows;
 const wintypes = @import("../platform/windows.zig");
+const builtin = @import("builtin");
+
+const is_windows: bool = builtin.os.tag == .windows;
 
 pub fn ZigWindowProcA(
     hwnd: win.HWND,
@@ -19,11 +22,29 @@ pub const OSWindowArgs = struct {
     hInstance: win.HINSTANCE
 };
 
+pub const OSWindowReference = if(is_windows) win.HWND else *opaque{};
+
 pub const OSWindow = struct {
 
-    instance: win.HWND = undefined,
+    instance: OSWindowReference = undefined,
 
     pub fn init(args: OSWindowArgs) OSWindow {
+        if(is_windows){
+            return initWindows(args);
+        }
+    }
+    pub fn show(this: *const OSWindow) void {
+        if(is_windows){
+            this.showWindows();
+        }
+    }
+    pub fn loop(this: *const OSWindow) void {
+        if(is_windows){
+            this.loopWindows();
+        }
+    }
+
+    fn initWindows(args: OSWindowArgs) OSWindow {
         // Create the "window class" - look and feel,
         // capabilities, etc.
         const win_class: wintypes.WNDCLASSA = . {
@@ -51,10 +72,12 @@ pub const OSWindow = struct {
         // Return a new OSWindow containing that instance
         return .{ .instance = instance };
     }
-    pub fn show(this: *const OSWindow) void {
+
+    fn showWindows(this: *const OSWindow) void {
         _ = wintypes.ShowWindow(this.instance, 1);
     }
-    pub fn loop(this: *const OSWindow) void {
+
+    fn loopWindows(this: *const OSWindow) void {
         var message: wintypes.MSG = undefined;
         while(wintypes.GetMessageA(&message, this.instance, 0, 0) > 0){
             _ = wintypes.TranslateMessage(&message);

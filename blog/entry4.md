@@ -150,3 +150,54 @@ Originally, I was `return 0` inside of the if statement.
 This worked on Win 11, but for some reason, not Win 10.
 Having the function return the default made it Win 10
 compatible, which does make sense.
+
+## A little detour, pt.2
+The last little detour introduced me to the `builtin`
+module, which I suspected was how you do cross-
+platform code, so this piqued my interest. I decided
+to decouple the API of my `OSWindow` class from
+win32. First step, detect if we're building for
+windows!
+
+```zig
+const builtin = @import("builtin");
+
+const is_windows: bool = builtin.os.tag == .windows;
+```
+
+The `OSWindow` class holds a win32 handdle to
+the window we instantiated. That can't fly, so
+let's change that to something a little more...
+comptime-y.
+
+```zig
+pub const OSWindowReference = if(is_windows) win.HWND else *opaque{};
+```
+
+I don't know what X11 gives us yet, so I've just left it
+as an `*opaque{}`
+
+Now, I can change the structure declaration to this:
+
+```zig
+pub const OSWindow = struct {
+
+    instance: OSWindowReference = undefined,
+```
+
+Now the type of `instance` depends on the compilation
+target. Very neat! I've also started making private
+functions to separate the platform-specific
+implementations of functions like `show`:
+
+```zig
+ pub fn show(this: *const OSWindow) void {
+    if(is_windows){
+        this.showWindows();
+    }
+}
+
+fn showWindows(this: *const OSWindow) void {
+    _ = wintypes.ShowWindow(this.instance, 1);
+}
+```
