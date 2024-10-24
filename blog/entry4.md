@@ -106,3 +106,47 @@ a win32 window. Instead, we need to use an extension.
 This project *hopes* to support X11, but again,
 that's a project for another day (very soon, probably
 after I render my first triangle)
+
+## A little detour
+On Windows, since we are entering a graphical context,
+the console no longer works. This means I can't
+"poor man's debug" using `std.debug.print` anymore
+because the output just goes off into the `void`.
+
+Believe it or not, there's actually an easy solution.
+`AllocConsole` and `FreeConsole` allow me to create and
+then destroy a console where stdout will finally be
+displayed. Just a little bit of binding work and now
+I have a console in Windows again!
+
+```zig
+if(builtin.mode == .Debug){
+    _ = wintypes.AllocConsole();
+    // defer can't be used here because it executes
+    // at the end of this "if" scope, when we need
+    // it to execute at the end of the containing scope.
+}
+
+os_win.show();
+os_win.loop();
+
+if(builtin.mode == .Debug){
+    _ = wintypes.FreeConsole();
+}
+```
+
+This actually helped me correct my message loop,
+which needed to be changed to this:
+
+```zig
+if(uMsg == wintypes.WM_CLOSE){
+    wintypes.PostQuitMessage(0);
+    std.debug.print("Posted quit message!\n", .{});
+}
+return wintypes.DefWindowProcA(hwnd, uMsg, wParam, lParam);
+```
+
+Originally, I was `return 0` inside of the if statement.
+This worked on Win 11, but for some reason, not Win 10.
+Having the function return the default made it Win 10
+compatible, which does make sense.

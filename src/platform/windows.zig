@@ -85,3 +85,6 @@ pub extern fn PostQuitMessage(c_int) void;
 
 pub const WM_CLOSE: win.UINT = 0x0010;
 pub const WM_DESTROY: win.UINT = 0x0002;
+
+pub extern fn AllocConsole() callconv(win.WINAPI) win.BOOL;
+pub extern fn FreeConsole() callconv(win.WINAPI) win.BOOL;

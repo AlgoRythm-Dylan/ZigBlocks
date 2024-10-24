@@ -10,11 +10,9 @@ pub fn ZigWindowProcA(
 ) callconv(win.WINAPI) isize {
     if(uMsg == wintypes.WM_CLOSE){
         wintypes.PostQuitMessage(0);
-        return 0;
+        std.debug.print("Posted quit message!\n", .{});
     }
-    else {
-        return wintypes.DefWindowProcA(hwnd, uMsg, wParam, lParam);
-    }
+    return wintypes.DefWindowProcA(hwnd, uMsg, wParam, lParam);
 }
 
 pub const OSWindowArgs = struct {
@@ -62,5 +60,6 @@ pub const OSWindow = struct {
             _ = wintypes.TranslateMessage(&message);
             _ = wintypes.DispatchMessageA(&message);
         }
+        std.debug.print("Out of the message loop now\n", .{});
     }
 };
