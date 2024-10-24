@@ -18,8 +18,17 @@ pub fn ZigWindowProcA(
     return wintypes.DefWindowProcA(hwnd, uMsg, wParam, lParam);
 }
 
-pub const OSWindowArgs = struct {
-    hInstance: win.HINSTANCE
+const DEFAULT_WIDTH: u32 = 500;
+const DEFAULT_HEIGHT: u32 = 300;
+
+pub const OSWindowArgs = if(is_windows) struct {
+    hInstance: win.HINSTANCE,
+    width: u32 = DEFAULT_WIDTH,
+    height: u32 = DEFAULT_HEIGHT,
+}
+else struct {
+    width: u32 = DEFAULT_WIDTH,
+    height: u32 = DEFAULT_HEIGHT,
 };
 
 pub const OSWindowReference = if(is_windows) win.HWND else *opaque{};

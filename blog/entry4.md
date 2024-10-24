@@ -11,7 +11,7 @@ recommend installing the SDK. It's 4GB, but that's
 not uncommon for an SDK - plus it comes with lots
 of tools that might help me in the future.
 
-The real advanrage is that it comes with all the
+The real advantage is that it comes with all the
 header files and libraries I need to get my program
 running.
 
@@ -201,3 +201,124 @@ fn showWindows(this: *const OSWindow) void {
     _ = wintypes.ShowWindow(this.instance, 1);
 }
 ```
+
+That just leaves the `init` function coupled
+to win32. It takes an `OSWindowArgs` as a
+parameter, which is defined as:
+
+```zig
+pub const OSWindowArgs = struct {
+    hInstance: win.HINSTANCE
+};
+```
+
+I think that the whole "hInstance" nonsense
+is just part of Windows' obtuse API and
+won't be necessary at all for X11. I'll try
+to do this one a little differently so
+we don't waste memory with some sort of dummy
+property.
+
+```zig
+const DEFAULT_WIDTH: u32 = 500;
+const DEFAULT_HEIGHT: u32 = 300;
+
+pub const OSWindowArgs = if(is_windows) struct {
+    hInstance: win.HINSTANCE,
+    width: u32 = DEFAULT_WIDTH,
+    height: u32 = DEFAULT_HEIGHT,
+}
+else struct {
+    width: u32 = DEFAULT_WIDTH,
+    height: u32 = DEFAULT_HEIGHT,
+};
+```
+
+It feels weird to use if/else like this,
+but Zig just works that way. In c, this
+would be a preprocessor's job, but Zig
+blurs the lines between compile time and
+runtime code by having the language itself
+account for both.
+
+I used to follow DRY principles like my
+life depended on it, but I realize that
+sometimes you need to violate DRY in order
+to produce good code, and this might just
+be one of those times.
+
+With that, the game is now de-coupled from
+win32 for the time being.
+
+## A little detour, pt.3
+Ok, now that I've learned how to use planform
+specific code, I think it's time to dive into
+the build file and make it platform-specific,
+too.
+
+Firstly, lets rename `main.zig` to `winmain.zig`
+so that we can separate our windows entry point
+from our entry point for other systems. To
+accommodate this, I've created a global variable
+in the build file called `is_for_windows`.
+
+```zig
+var is_for_windows: bool = false;
+```
+
+Then, I populate this variable using this code:
+
+```zig
+const target = b.standardTargetOptions(.{});
+is_for_windows = target.result.os.tag == .windows;
+```
+
+Finally, I use it to set our entry point conditionally
+using this code:
+
+```zig
+const entrypoint =
+    if (is_for_windows) b.path("src/winmain.zig")
+    else b.path("src/main.zig");
+
+const exe = b.addExecutable(.{
+    .name = "ZigBlocks",
+    .root_source_file = entrypoint,
+    .target = target,
+    .optimize = optimize,
+});
+```
+
+Isn't that beautiful? Let's handle that library
+linkage. Let's create some functions that link
+our libraries smartly depending on the target.
+
+Right now, the target is "either windows or not windows",
+but in the future, that may change.
+
+```zig
+fn addLibs(b: *std.Build, comp: *std.Build.Step.Compile) void {
+    comp.linkLibC();
+    if (is_for_windows) {
+        comp.linkSystemLibrary("user32");
+    }
+    addVulkan(b, comp);
+}
+
+fn addVulkan(b: *std.Build, comp: *std.Build.Step.Compile) void {
+    if (is_for_windows) {
+        comp.addLibraryPath(b.path("./dependency/windows/lib/"));
+    }
+    comp.linkSystemLibrary("vulkan-1");
+}
+```
+
+The usage of these functions is rather simple:
+
+```zig
+addLibs(b, exe);
+```
+
+Absolutely beautiful. A `zig build run` confirms
+this still works as intended. What an interesting
+build system.
