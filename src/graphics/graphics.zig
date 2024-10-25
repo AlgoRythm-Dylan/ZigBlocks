@@ -24,4 +24,13 @@ pub const Graphics = struct {
         vkfuncs.vkDestroyInstance(this.vulkan_instance, null);
     }
 
+    pub fn getPhysicalDeviceCount(this: *const Graphics) !u32 {
+        var count: u32 = undefined;
+        const result = vkfuncs.vkEnumeratePhysicalDevices(this.vulkan_instance, &count, null);
+        if(result != vktypes.VK_SUCCESS){
+            return error.CouldNotEnumeratePhysicalDevices;
+        }
+        return count;
+    }
+
 };
