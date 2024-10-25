@@ -52,12 +52,18 @@ fn addLibs(b: *std.Build, comp: *std.Build.Step.Compile) void {
     if (is_for_windows) {
         comp.linkSystemLibrary("user32");
     }
+    else {
+        comp.linkSystemLibrary("X11");
+    }
     addVulkan(b, comp);
 }
 
 fn addVulkan(b: *std.Build, comp: *std.Build.Step.Compile) void {
     if (is_for_windows) {
         comp.addLibraryPath(b.path("./dependency/windows/lib/"));
+    }
+    else {
+        comp.addLibraryPath(b.path("./dependency/linux/lib/"));
     }
     comp.linkSystemLibrary("vulkan-1");
 }
