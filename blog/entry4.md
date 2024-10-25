@@ -322,3 +322,117 @@ addLibs(b, exe);
 Absolutely beautiful. A `zig build run` confirms
 this still works as intended. What an interesting
 build system.
+
+With that, I absolutely promise that's the last
+detour and I will now get back to vulking. However,
+you can bet your bottom dollar the next task will
+be setting up a VM and making this mf work with
+X11. Unless I get to that point and change my mind :)
+
+## De-detour: back on track
+Okay, so what was I saying? Oh yeah, let's try to
+create a `vkInstance`. This is easier said than done,
+because there's a truckload of bindings required :(
+
+OK, it's been about an hour and I have all my bindings
+done. Now, I'm going to actually finally call my first
+Vulkan function. Here we go. I want this all to be the
+responsibility of a struct, so let's do that.
+
+```zig
+const vktypes = @import("./vulkan/types.zig");
+const vkfuncs = @import("./vulkan/methods.zig");
+
+pub const Graphics = struct {
+
+    vulkan_instance: vktypes.VkInstance,
+
+    pub fn init() !Graphics {
+        var instance: vktypes.VkInstance = undefined;
+
+        const create_info = vktypes.VkInstanceCreateInfo { };
+
+        const result = vkfuncs.vkCreateInstance(&create_info, null, &instance);
+        if(result != vktypes.VK_SUCCESS){
+            return error.VkCreateInstanceFailed;
+        }
+
+        return Graphics {
+            .vulkan_instance = instance
+        };
+    }
+
+};
+```
+
+Back in my winmain, it fits right into here:
+
+```zig
+if(builtin.mode == .Debug){
+    _ = wintypes.AllocConsole();
+}
+
+_ = graphics.Graphics.init() catch |err| {
+    std.debug.print("Error: {}\n", .{err});
+    return 1;
+};
+
+os_win.show();
+os_win.loop();
+```
+
+And with a heavy heart, I ran `zig build run`, expecting
+difficult to solve errors. To my absolute delight, after
+some syntax business, it ran! This technically meets my
+goal of vulking, but there's no output, so it's hard to
+say what's going on. Before we get some output, let's handle
+cleaning up.
+
+In the `Graphics` struct:
+
+```zig
+pub fn deinit(this: *const Graphics) void {
+    vkfuncs.vkDestroyInstance(this.vulkan_instance, null);
+}
+```
+
+In `winmain.zig`:
+
+```zig
+const graphics_instance = graphics.Graphics.init() catch |err| {
+    std.debug.print("Error: {}\n", .{err});
+    return 1;
+};
+
+defer graphics_instance.deinit();
+errdefer graphics_instance.deinit();
+```
+
+I think it's required to use both `defer` and `errdefer`
+to clean up the vk instance even if the main loop crashes.
+I don't know if leaving an uncleaned instance is bad
+for the OS/ Graphics card, but I'm not gonna be the guy
+to find out.
+
+## Picking a physical device
+Since we need to do this anyways, let's get the list
+of available devices that Vulkan can render to and
+then we can see once and for all if my code is *really*
+working.
+
+I've set up the bindings and I don't really want
+to keep this code, so I'll just put it into
+`winmain` and delete it later. This code is written after
+I initialize my `Graphics`:
+
+```zig
+var physical_device_count: u32 = 99;
+_ = vkfuncs.vkEnumeratePhysicalDevices(graphics_instance.vulkan_instance, &physical_device_count, null);
+std.debug.print("Physical devices found: {d}\n", .{ physical_device_count });
+```
+
+And viola:
+
+![physical devices count is one](assets/physical_devices_found.png)
+
+That concludes this extremely lengthy entry.

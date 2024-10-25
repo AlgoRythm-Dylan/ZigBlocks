@@ -55,3 +55,4 @@ Read about my progress and see what it's like to be me!
 - [entry1](blog/entry1.md): I create a basic win32 window
 - [entry2](blog/entry2.md): Implementing a win32 message loop for the window
 - [entry3](blog/entry3.md): Code re-org of previous two entries
+- [entry4](blog/entry4.md): Cross-platform code & Vulkan extreme basics
