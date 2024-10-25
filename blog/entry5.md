@@ -1,8 +1,8 @@
 # Linux
 Windows is, in many ways, lame. But that's besides the
 point. Having the code work cross-platform is one of
-the goals of this project and today, was my goal;
-and what a journey it has been.
+the goals of this project and today, achieving this goal
+was my target; and what a journey it has been.
 
 I don't have any spare computers to install Linux on
 so I had to spin up a Hyper-V instance of Ubuntu.
