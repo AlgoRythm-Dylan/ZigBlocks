@@ -36,10 +36,11 @@ pub export fn wWinMain(hInstance: win.HINSTANCE,
         return 1;
     };
 
-    var physical_device_count: u32 = 99;
-    _ = vkfuncs.vkEnumeratePhysicalDevices(graphics_instance.vulkan_instance, &physical_device_count, null);
-    std.debug.print("Physical devices found: {d}\n", .{ physical_device_count });
-
+    const physical_device_count = graphics_instance.getPhysicalDeviceCount() catch |err| {
+        std.debug.print("Error getting physical devices count: {}\n", .{ err });
+        return 1;
+    };
+    std.debug.print("Physical device count: {}\n", .{ physical_device_count });
 
     defer graphics_instance.deinit();
     errdefer graphics_instance.deinit();
