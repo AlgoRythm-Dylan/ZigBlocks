@@ -32,12 +32,7 @@ else struct {
     height: u32 = DEFAULT_HEIGHT,
 };
 
-const X11OSWindowReference = struct {
-    window: x11.Window,
-    display: x11.Display
-};
-
-pub const OSWindowReference = if(is_windows) win.HWND else x11.X11OSWindowReference;
+pub const OSWindowReference = if(is_windows) win.HWND else x11.X11DisplayReference;
 
 pub const OSWindow = struct {
 
@@ -62,6 +57,9 @@ pub const OSWindow = struct {
     pub fn loop(this: *const OSWindow) void {
         if(is_windows){
             this.loopWindows();
+        }
+        else {
+            this.loopX11();
         }
     }
 
@@ -109,37 +107,15 @@ pub const OSWindow = struct {
 
     fn initX11(args: OSWindowArgs) !OSWindow {
         _ = args;
-        const maybe_display = x11.XOpenDisplay(null);
-        if(maybe_display) |display| {
-            const maybe_default_screen = x11.DefaultScreenOfDisplay(display);
-            if(maybe_default_screen) |default_screen| {
-                const root_window = x11.RootWindowOfScreen(default_screen);
-                const window = x11.XCreateSimpleWindow(
-                    display,
-                    root_window,
-                    10,
-                    10,
-                    500,
-                    300,
-                    0,
-                    0,
-                    0
-                );
-                return .{ .instance = .{
-                    .window = window,
-                    .display = display
-                } };
-            }
-            else {
-                return error.X11DefaultScreenWasNull;
-            }
-        }
-        else {
-            return error.X11DisplayWasNull;
-        }
+        const ref = x11.initX11();
+        return .{ .instance = ref };
     }
 
-    fn showX11(this: *OSWindow) void {
-        _ = x11.XMapWindow(this.instance.display, this.instance.window);
+    fn showX11(this: *const OSWindow) void {
+        x11.showX11Window(&this.instance);
+    }
+
+    fn loopX11(this: *const OSWindow) void {
+        x11.loopX11Window(&this.instance);
     }
 };
