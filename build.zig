@@ -54,6 +54,7 @@ fn addLibs(b: *std.Build, comp: *std.Build.Step.Compile) void {
     }
     else {
         comp.linkSystemLibrary("X11");
+        comp.linkSystemLibrary("X11extra");
     }
     addVulkan(b, comp);
 }

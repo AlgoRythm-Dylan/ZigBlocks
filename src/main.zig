@@ -1,5 +1,7 @@
 const std = @import("std");
+const window = @import("./interfacing/window.zig");
 
-pub fn main() void {
-    std.debug.print("Hello world!\n", .{});
+pub fn main() !void {
+    const os_window = try window.OSWindow.init(.{});
+    os_window.loop();
 }

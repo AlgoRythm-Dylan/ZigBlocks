@@ -1,7 +1,8 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const win = std.os.windows;
 const wintypes = @import("../platform/windows.zig");
-const builtin = @import("builtin");
+const x11 = @import("../platform/x11.zig");
 
 const is_windows: bool = builtin.os.tag == .windows;
 
@@ -31,20 +32,31 @@ else struct {
     height: u32 = DEFAULT_HEIGHT,
 };
 
-pub const OSWindowReference = if(is_windows) win.HWND else *opaque{};
+const X11OSWindowReference = struct {
+    window: x11.Window,
+    display: x11.Display
+};
+
+pub const OSWindowReference = if(is_windows) win.HWND else x11.X11OSWindowReference;
 
 pub const OSWindow = struct {
 
     instance: OSWindowReference = undefined,
 
-    pub fn init(args: OSWindowArgs) OSWindow {
+    pub fn init(args: OSWindowArgs) !OSWindow {
         if(is_windows){
             return initWindows(args);
+        }
+        else {
+            return try initX11(args);
         }
     }
     pub fn show(this: *const OSWindow) void {
         if(is_windows){
             this.showWindows();
+        }
+        else {
+            this.showX11();
         }
     }
     pub fn loop(this: *const OSWindow) void {
@@ -93,5 +105,41 @@ pub const OSWindow = struct {
             _ = wintypes.DispatchMessageA(&message);
         }
         std.debug.print("Out of the message loop now\n", .{});
+    }
+
+    fn initX11(args: OSWindowArgs) !OSWindow {
+        _ = args;
+        const maybe_display = x11.XOpenDisplay(null);
+        if(maybe_display) |display| {
+            const maybe_default_screen = x11.DefaultScreenOfDisplay(display);
+            if(maybe_default_screen) |default_screen| {
+                const root_window = x11.RootWindowOfScreen(default_screen);
+                const window = x11.XCreateSimpleWindow(
+                    display,
+                    root_window,
+                    10,
+                    10,
+                    500,
+                    300,
+                    0,
+                    0,
+                    0
+                );
+                return .{ .instance = .{
+                    .window = window,
+                    .display = display
+                } };
+            }
+            else {
+                return error.X11DefaultScreenWasNull;
+            }
+        }
+        else {
+            return error.X11DisplayWasNull;
+        }
+    }
+
+    fn showX11(this: *OSWindow) void {
+        _ = x11.XMapWindow(this.instance.display, this.instance.window);
     }
 };
