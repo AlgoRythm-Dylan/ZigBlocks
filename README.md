@@ -57,3 +57,4 @@ Read about my progress and see what it's like to be me!
 - [entry3](blog/entry3.md): Code re-org of previous two entries
 - [entry4](blog/entry4.md): Cross-platform code & Vulkan extreme basics
 - [entry5](blog/entry5.md): X11 window basics and adding some c code to the codebase
+- [entry6](blog/entry6.md): Getting physical device attributes and printing out GPU name

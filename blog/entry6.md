@@ -81,3 +81,11 @@ There's a couple newlines after the name for some reason
 but I don't have the energy to care about that right now.
 This actually worked without too much trouble, if you can
 believe that. Time to try it on Linux.
+
+![my graphics card's name](assets/physical_device_name_linux.png)
+
+Wow, very cool when stuff just works.
+
+My method for picking the device is far too simple,
+though. I'm literally just choosing the first one.
+I will solve that problem Later(TM).
