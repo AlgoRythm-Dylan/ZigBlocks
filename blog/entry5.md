@@ -89,4 +89,70 @@ of the platforms' windowing code) in c and exporting
 an easy-to-use interface. There's no use writing
 tons of crappy Zig whose only job is to call
 c functions when you can write a little bit of
-nice c instead.
+nice c instead. Here's what some of that looks like:
+
+```c
+typedef struct {
+    Display* display;
+    Screen* screen;
+    Window window, root_window;
+} X11DisplayReference;
+
+extern X11DisplayReference initX11(){
+    X11DisplayReference ref;
+
+    ref.display = XOpenDisplay(NULL);
+    assert(ref.display != NULL);
+
+    ref.screen = DefaultScreenOfDisplay(ref.display);
+    assert(ref.display != NULL);
+
+    ref.root_window = RootWindowOfScreen(ref.screen);
+
+    const int screenId = DefaultScreen(ref.display);
+
+    ref.window = XCreateSimpleWindow(
+        ref.display,
+        ref.root_window,
+        10, 10,
+        500, 300,
+        0,
+        BlackPixel(ref.display, screenId),
+        WhitePixel(ref.display, screenId)
+    );
+    XStoreName(ref.display, ref.window, "ZigBlocks");
+
+    return ref;
+}
+```
+
+Compare this to the ENTIRE Zig file:
+
+```zig
+pub const Display = *opaque{};
+pub const Screen = *opaque{};
+pub const Window = u64;
+
+pub const X11DisplayReference = extern struct {
+    display: ?Display,
+    screen: ?Screen,
+    root_window: Window,
+    window: Window
+};
+
+pub extern fn initX11() X11DisplayReference;
+pub extern fn showX11Window(ref: *const X11DisplayReference) void;
+pub extern fn loopX11Window(ref: *const X11DisplayReference) void;
+```
+
+As it turns out, this idea (so far) works pretty well!
+Ignore the error under the "voi" of "void" in this
+screenshot. That's just ZLS being crap as per usual.
+
+![an x11 window](assets/x11_window_first_time.png)
+
+Maybe Zig isn't going to replace c, but instead, Zig
+is going to work alongside it like a good friend.
+
+Well anyways, it's 1:30AM and I have work in the morning
+so that will be the end of today's work.
