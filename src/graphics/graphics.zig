@@ -1,9 +1,14 @@
 const vktypes = @import("./vulkan/types.zig");
 const vkfuncs = @import("./vulkan/methods.zig");
 
+const MAX_DEVICE_COUNT = 8;
+
 pub const Graphics = struct {
 
     vulkan_instance: vktypes.VkInstance,
+    physical_device_count: u32 = 0,
+    physical_devices: [MAX_DEVICE_COUNT]vktypes.VkPhysicalDevice = undefined,
+    active_physical_device: *vktypes.VkPhysicalDevice = undefined,
 
     pub fn init() !Graphics {
         var instance: vktypes.VkInstance = undefined;
@@ -15,22 +20,41 @@ pub const Graphics = struct {
             return error.VkCreateInstanceFailed;
         }
 
-        return Graphics {
+        var g: Graphics = .{
             .vulkan_instance = instance
         };
+
+        try g.getPhysicalDeviceCount();
+        try g.getPhysicalDevices();
+        g.pickPhysicalDevice();
+
+        return g;
     }
 
     pub fn deinit(this: *const Graphics) void {
         vkfuncs.vkDestroyInstance(this.vulkan_instance, null);
     }
 
-    pub fn getPhysicalDeviceCount(this: *const Graphics) !u32 {
-        var count: u32 = undefined;
-        const result = vkfuncs.vkEnumeratePhysicalDevices(this.vulkan_instance, &count, null);
+    fn getPhysicalDeviceCount(this: *Graphics) !void {
+        const result = vkfuncs.vkEnumeratePhysicalDevices(this.vulkan_instance, &this.physical_device_count, null);
         if(result != vktypes.VK_SUCCESS){
             return error.CouldNotEnumeratePhysicalDevices;
         }
-        return count;
+    }
+
+    fn getPhysicalDevices(this: *Graphics) !void {
+        if(this.physical_device_count > MAX_DEVICE_COUNT){
+            return error.TooManyDevices;
+        }
+        const result = vkfuncs.vkEnumeratePhysicalDevices(this.vulkan_instance, &this.physical_device_count, &this.physical_devices);
+        if(result != vktypes.VK_SUCCESS){
+            return error.CouldNotEnumeratePhysicalDevices;
+        }
+    }
+
+    fn pickPhysicalDevice(this: *Graphics) void {
+        // For now, just return the first device
+        this.active_physical_device = &this.physical_devices[0];
     }
 
 };

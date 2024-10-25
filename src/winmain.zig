@@ -6,6 +6,7 @@ const builtin = @import("builtin");
 const graphics = @import("./graphics/graphics.zig");
 
 const vkfuncs = @import("./graphics/vulkan/methods.zig");
+const vktypes = @import("./graphics/vulkan/types.zig");
 
 pub export fn WinMain(hInstance: win.HINSTANCE,
                       hPrevInstance: ?win.HINSTANCE,
@@ -36,11 +37,10 @@ pub export fn wWinMain(hInstance: win.HINSTANCE,
         return 1;
     };
 
-    const physical_device_count = graphics_instance.getPhysicalDeviceCount() catch |err| {
-        std.debug.print("Error getting physical devices count: {}\n", .{ err });
-        return 1;
-    };
-    std.debug.print("Physical device count: {}\n", .{ physical_device_count });
+
+    var properties: vktypes.VkPhysicalDeviceProperties = undefined;
+    vkfuncs.vkGetPhysicalDeviceProperties(graphics_instance.active_physical_device.*, &properties);
+    std.debug.print("Active physical device name: {s}\n", .{ properties.deviceName });
 
     defer graphics_instance.deinit();
     errdefer graphics_instance.deinit();

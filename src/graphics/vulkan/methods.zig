@@ -14,8 +14,13 @@ pub extern fn vkDestroyInstance(
 pub extern fn vkEnumeratePhysicalDevices(
     instance: types.VkInstance,
     pPhysicalDeviceCount: *u32,
-    pPhysicalDevices: ?*types.VkPhysicalDevice
+    pPhysicalDevices: ?[*]types.VkPhysicalDevice
 ) types.VkResult;
+
+pub extern fn vkGetPhysicalDeviceProperties(
+    physicalDevice: types.VkPhysicalDevice,
+    pProperties: *types.VkPhysicalDeviceProperties
+) void;
 
 pub extern fn vkCreateWin32SurfaceKH(
     instance: types.VkInstance,

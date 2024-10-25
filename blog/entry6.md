@@ -1,4 +1,4 @@
-# (untitled)
+# Physical devices!
 Today is a new day and I figured I could start
 off by validating that the Vulkan code I wrote
 and tested in Windows works in Linux too. So,
@@ -56,3 +56,28 @@ That makes our "user space" code much nicer, plus,
 since we don't need to be annoyed with checking the
 `VkResult` each time in user space, it's more of
 an attractive option to do error handling now.
+
+## Getting physical device properties
+The next step is to choose the best GPU to use for
+the game. We can do this by getting a list of all
+devices and then looking at their properties.
+
+To do this, we call the function `vkGetPhysicalDeviceProperties`
+which takes in a `VkPhysicalDevice` and a
+`VkPhysicalDeviceProperties` struct. Unfortunately for me,
+`VkPhysicalDeviceProperties` has a property
+`VkPhysicalDeviceLimits` which has over 100 properties. I
+did indeed decide to bind this to Zig by hand and it did
+indeed take like 15 damn minutes. Oh well, not everything
+in programming is glamorous.
+
+So, after a bunch of binding and re-writing the
+`Graphics` class a bit  (to be more friendly in
+user-space), this is what I ended up with:
+
+![my graphics card's name](assets/physical_device_name.png)
+
+There's a couple newlines after the name for some reason
+but I don't have the energy to care about that right now.
+This actually worked without too much trouble, if you can
+believe that. Time to try it on Linux.
