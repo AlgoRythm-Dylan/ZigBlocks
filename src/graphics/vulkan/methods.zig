@@ -22,6 +22,12 @@ pub extern fn vkGetPhysicalDeviceProperties(
     pProperties: *types.VkPhysicalDeviceProperties
 ) void;
 
+pub extern fn vkGetPhysicalDeviceQueueFamilyProperties(
+    physicalDevice: types.VkPhysicalDevice,
+    pQueueFamilyPropertyCount: *u32,
+    pQueueFamilyProperties: ?[*]types.VkQueueFamilyProperties
+) void;
+
 pub extern fn vkCreateWin32SurfaceKH(
     instance: types.VkInstance,
     pCreateInfo: types.VkWin32SurfaceCreateInfoKHR

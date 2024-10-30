@@ -3,6 +3,7 @@ const win32 = @import("std").os.windows;
 pub const VkStructureType = i32;
 pub const VkFlags = i32;
 pub const VkInstanceCreateFlags = VkFlags;
+pub const VkQueueFlags = VkFlags;
 pub const VkWin32SurfaceCreateFlagsKHR = i32;
 pub const VkResult = i32;
 pub const VkInstance = *opaque{};
@@ -14,6 +15,15 @@ pub const VkBool32 = u32;
 pub const VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO: VkStructureType = 1;
 pub const VK_MAX_PHYSICAL_DEVICE_NAME_SIZE: u32 = 256;
 pub const VK_UUID_SIZE: u32 = 16;
+
+pub const VK_QUEUE_GRAPHICS_BIT: VkQueueFlags = 0x00000001;
+pub const VK_QUEUE_COMPUTE_BIT: VkQueueFlags = 0x00000002;
+pub const VK_QUEUE_TRANSFER_BIT: VkQueueFlags = 0x00000004;
+pub const VK_QUEUE_SPARSE_BINDING_BIT: VkQueueFlags = 0x00000008;
+pub const VK_QUEUE_PROTECTED_BIT: VkQueueFlags = 0x00000010;
+pub const VK_QUEUE_VIDEO_DECODE_BIT_KHR: VkQueueFlags = 0x00000020;
+pub const VK_QUEUE_VIDEO_ENCODE_BIT_KHR: VkQueueFlags = 0x00000040;
+pub const VK_QUEUE_OPTICAL_FLOW_BIT_NV: VkQueueFlags = 0x00000100;
 
 pub const VK_SUCCESS: VkResult = 0;
 
@@ -245,6 +255,19 @@ pub const VkPhysicalDeviceProperties = extern struct {
     pipelineCacheUUID: [VK_UUID_SIZE]u8 = undefined,
     limits: VkPhysicalDeviceLimits = undefined,
     sparseProperties: VkPhysicalDeviceSparseProperties = undefined
+};
+
+pub const VkExtent3D = extern struct {
+    width: u32 = undefined,
+    height: u32 = undefined,
+    depth: u32 = undefined,
+};
+
+pub const VkQueueFamilyProperties = extern struct {
+    queueFlags: VkQueueFlags = undefined,
+    queueCount: u32 = undefined,
+    timestampValidBits: u32 = undefined,
+    minImageTransferGranularity: VkExtent3D = undefined
 };
 
 /// Structure specifying parameters of a newly created Win32 surface object
