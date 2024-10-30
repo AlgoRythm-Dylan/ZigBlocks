@@ -56,17 +56,19 @@ pub const Graphics = struct {
     fn pickPhysicalDevice(this: *Graphics) void {
         // For now, just return the first device
         this.active_physical_device = &this.physical_devices[0];
-        if(this.hasQueueFamily(vktypes.VK_QUEUE_GRAPHICS_BIT)){
-            std.debug.print("Does have graphics bit\n", .{});
-        }
-        else {
-            std.debug.print("Does NOT have graphics bit\n", .{});
-        }
     }
 
-    fn hasQueueFamily(this: *const Graphics, flag: vktypes.VkQueueFlags) bool {
-        var queueFamilies: [16]vktypes.VkQueueFamilyProperties = undefined;
+    fn hasQueueFamily(this: *const Graphics, flag: vktypes.VkQueueFlags) !bool {
         var count: u32 = 0;
+        vkfuncs.vkGetPhysicalDeviceQueueFamilyProperties(
+            this.active_physical_device.*,
+            &count,
+            null
+        );
+        if(count > 16){
+            return error.TooManyQueueFamilies;
+        }
+        var queueFamilies: [16]vktypes.VkQueueFamilyProperties = undefined;
         vkfuncs.vkGetPhysicalDeviceQueueFamilyProperties(
             this.active_physical_device.*,
             &count,
